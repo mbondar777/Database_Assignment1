@@ -4,7 +4,7 @@ WITH movies_statistics AS (
     SELECT
         m.movie_id,
         AVG(r.rating) AS avg_rating,
-        COUNT(u.user_id) AS num_unique_raters,
+        COUNT(u.user_id) AS num_raters,
         COALESCE(actor_counts.actor_count, 0) AS actor_count
     FROM movies m
     LEFT JOIN ratings r ON m.movie_id = r.movie_id
@@ -20,8 +20,7 @@ WITH movies_statistics AS (
     ) AS actor_counts ON m.movie_id = actor_counts.movie_id
     GROUP BY m.movie_id, actor_counts.actor_count
     HAVING
-        COUNT(u.user_id) >= 3
-        AND COALESCE(actor_counts.actor_count, 0) >= 1
+        COUNT(u.user_id) >= 3 AND COALESCE(actor_counts.actor_count, 0) >= 1
 )
 SELECT
     m.movie_id,
@@ -30,7 +29,7 @@ SELECT
     m.country,
     m.genre,
     ROUND(ma.avg_rating, 2) AS avg_rating,
-    ma.num_unique_raters, 
+    ma.num_raters, 
     ma.actor_count
 FROM movies AS m
 JOIN movies_statistics AS ma ON m.movie_id = ma.movie_id
@@ -39,7 +38,7 @@ WHERE
     AND ma.avg_rating > 5
 ORDER BY
     avg_rating DESC,
-    ma.num_unique_raters DESC
+    ma.num_raters DESC
 LIMIT 5;
 
 SELECT 'Actor'   AS role_group, pr.person_id, pr.name
